@@ -43,31 +43,17 @@ int main(int argc, char** argv) {
   const int t = io::next<int>(f);
   
   vector<int> p = io::next_array<int>(n, f);
-  vector<vector<int>> g(n);
+  int result = 0;
+  int current = s;
 
-  for (int i = 0; i < n; ++i) {
-    g[i].push_back(p[i]);
-  }
-
-  unordered_set<int> visited;
-  queue<pair<int, int>> q;
-
-  visited.insert(s);
-  for (q.push({ s, 0 }); !q.empty(); q.pop()) {
-    const int now = q.front().first;
-    const int cost = q.front().second;
-
-    if (now == t) {
-      cout << cost << endl;
+  do {
+    if (current == t) {
+      cout << result << endl;
       return 0;
     }
-    for (const int next : g[now]) {
-      if (visited.find(next) == visited.end()) {
-        q.push({ next, cost + 1 });
-        visited.insert(next);
-      }
-    }
-  }
+    current = p[current];
+    ++result;
+  } while (current != s);
   cout << -1 << endl;
   return 0;
 }
