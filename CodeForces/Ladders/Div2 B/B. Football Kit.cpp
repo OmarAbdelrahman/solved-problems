@@ -8,7 +8,6 @@ struct io {
     return x;
   }
 
-
   template<class T>
   static inline std::vector<T> next_array(const int n) {
     std::vector<T> row(n);
