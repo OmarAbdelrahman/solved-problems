@@ -32,11 +32,16 @@ int main(int argc, char** argv) {
     cin >> a[i];
   }
 
-  for (int i = 0; i <= 1001; ++i) {
-    if (!can(i, n)) {
-      cout << i - 1 << "\n";
-      break;
+  int b = 0;
+  int e = 1000;
+  while (e - b > 1) {
+    int m = (b + e) >> 1;
+    if (can(m, n)) {
+      b = m;
+    } else {
+      e = m;
     }
   }
+  cout << b << "\n";
   return 0;
 }
