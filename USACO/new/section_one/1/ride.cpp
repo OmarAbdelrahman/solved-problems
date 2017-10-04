@@ -24,9 +24,9 @@ int main() {
   scanf("%s", s);
   scanf("%s", t);
   if (compute(s) == compute(t)) {
-  	puts("GO");
+    puts("GO");
   } else {
-  	puts("STAY");
+    puts("STAY");
   }
   return 0;
 }
