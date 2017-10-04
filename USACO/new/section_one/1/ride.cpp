@@ -7,27 +7,23 @@ TASK: ride
 #include <bits/stdc++.h>
 using namespace std;
 
-char s[10];
-char t[10];
+inline int compute(const char* s) {
+  const int n = strlen(s);
+  int p = 1;
+  for (int i = 0; i < n; i++) {
+    p *= (s[i] - 'A' + 1);
+    p %= 47;
+  }
+  return p;
+}
 
 int main() {
   freopen("ride.in", "r", stdin);
   freopen("ride.out", "w", stdout);
+  char s[10], t[10];
   scanf("%s", s);
   scanf("%s", t);
-  int n = strlen(s);
-  int m = strlen(t);
-  int sp = 1;
-  for (int i = 0; i < n; i++) {
-  	sp *= (s[i] - 'A' + 1);
-  	sp %= 47;
-  }
-  int tp = 1;
-  for (int i = 0; i < m; i++) {
-  	tp *= (t[i] - 'A' + 1);
-  	tp %= 47;
-  }
-  if (sp == tp) {
+  if (compute(s) == compute(t)) {
   	puts("GO");
   } else {
   	puts("STAY");
