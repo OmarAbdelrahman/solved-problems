@@ -43,14 +43,10 @@ int main() {
     int fi = (i + 1) % n;
     int c1 = max(compute(i, b_necklace, -1), compute(i, r_necklace, -1));
     int c2 = max(compute(fi, b_necklace, 1), compute(fi, r_necklace, 1));
-    if (c1 == n || c2 == n) {
-      printf("%d\n", n);
-      return 0;
-    }
-    if (c1 + c2 > n) {
-      continue;
-    }
     result = max(result, c1 + c2);
+  }
+  if (result > n) {
+    result = n;
   }
   printf("%d\n", result);
   return 0;
