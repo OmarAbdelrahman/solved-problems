@@ -7,13 +7,11 @@ TASK: milk2
 #include <bits/stdc++.h>
 using namespace std;
 
-const int N = 5555;
-
 struct interval_type {
   int s;
   int e;
 
-  bool operator < (const interval_type& i) {
+  bool operator < (const interval_type& i) const {
     if (s != i.s) {
       return s < i.s;
     }
@@ -29,41 +27,30 @@ struct interval_type {
   }
 };
 
-vector<interval_type> farmer;
-
-int continous_milking(int& si, int n) {
-  int i = si;
-  while (farmer[si - 1].overlaps(farmer[si]) && si + 1 < n) {
-    si++;
-  }
-  return farmer[si].e - farmer[i].s;
-}
-
-int continous_empty(int& si, int n) {
-  int i = si;
-  while (!farmer[si - 1].overlaps(farmer[si]) && si + 1 < n) {
-    si++;
-  }
-  return farmer[si].s - farmer[i].e;
-}
+interval_type farmer[5555];
 
 int main() {
-  // freopen("milk2.in", "r", stdin);
-  // freopen("milk2.out", "w", stdout);
+  freopen("milk2.in", "r", stdin);
+  freopen("milk2.out", "w", stdout);
   int n;
   scanf("%d", &n);
-  interval.resize(n);
   for (int i = 0; i < n; i++) {
     scanf("%d %d", &farmer[i].s, &farmer[i].e);
   }
-  sort(farmer.begin(), farmer.end());
+  sort(farmer, farmer + n);
   int max_milking = farmer[0].e - farmer[0].s;
   int max_empty = 0;
+  interval_type border = farmer[0];
   for (int i = 1; i < n; i++) {
-    max_milking = max(max_milking, continous_milking(i, n));
-  }
-  for (int i = 1; i < n; i++) {
-    max_empty = max(max_empty, continous_empty(i, n));
+    if (border.overlaps(farmer[i])) {
+      if (farmer[i].e > border.e) {
+        border.e = farmer[i].e;
+      }
+      max_milking = max(max_milking, border.e - border.s);
+    } else {
+      max_empty = max(max_empty, farmer[i].s - border.e);
+      border = farmer[i];
+    }
   }
   printf("%d %d\n", max_milking, max_empty);
   return 0;
