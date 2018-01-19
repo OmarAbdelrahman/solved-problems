@@ -20,20 +20,21 @@ struct node {
   bool up, down;
   bool left, right;
   int x, y;
+  int component_size;
 
   node() { }
 
   node(int _x, int _y, int n):
-    x(_x), y(_y),
     up((n & 2) == 0),
     down((n & 8) == 0),
     left((n & 1) == 0),
-    right((n & 4) == 0) { }
+    right((n & 4) == 0),
+    x(_x), y(_y) { }
 
   void print() {
     cout << "(" << x << ", " << y << ") = " 
-        << "(up = " << up << ", down = " << down 
-        << ", left = " << left << ", right = " << right << ")\n";
+      << "(up = " << up << ", down = " << down 
+      << ", left = " << left << ", right = " << right << ")\n";
   }
 };
 
@@ -67,10 +68,10 @@ struct flood_fill {
     connected[components].push_back(cur);
     const node& value = grid[x][y];
     int count = 1;
-    count += dfs(x - value.up, y);
-    count += dfs(x + value.down, y);
-    count += dfs(x, y - value.left);
-    count += dfs(x, y + value.right);
+    count += dfs(grid[x - value.up][y]);
+    count += dfs(grid[x + value.down][y]);
+    count += dfs(grid[x][y - value.left]);
+    count += dfs(grid[x][y + value.right]);
     return count;
   }
 
@@ -78,8 +79,12 @@ struct flood_fill {
     for (int i = 0; i < n; i++) {
       for (int j = 0; j < m; j++) {
         if (!visited[i][j]) {
+          connected.push_back(vector<node>());
           int count = dfs(grid[i][j]);
           max_size = max(max_size, count);
+          for (node& n : connected[components]) {
+            n.component_size = count;
+          }
           components++;
         }
       }
