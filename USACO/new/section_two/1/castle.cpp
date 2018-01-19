@@ -25,6 +25,8 @@ struct node
   bool visited;
   int size;
   int component;
+  int size_after_merge;
+  char direction;
 
   node(): visited(false) { }
 
@@ -34,7 +36,9 @@ struct node
     left((n & 1) == 0),
     right((n & 4) == 0),
     x(_x), y(_y),
-    visited(false)
+    visited(false),
+    size_after_merge(numeric_limits<int>::min()),
+    direction('A')
     {
     }
 
@@ -51,6 +55,33 @@ struct node
     return cur;
   }
 
+  void merge_rooms(const vector<vector<node>>& grid)
+  {
+    auto get = [this](const int s, const char d) {
+      if (s >= size_after_merge) {
+        size_after_merge = s;
+        direction = d;
+      }
+    };
+    if (!left && y - 1 >= 0 && !same_component(grid[x][y - 1])) {
+      get(size + grid[x][y - 1].size, 'W');
+    }
+    if (!down && x + 1 < SIZE(grid) && !same_component(grid[x + 1][y])) {
+      get(size + grid[x + 1][y].size, 'S');
+    }
+    if (!right && y + 1 < SIZE(grid[x]) && !same_component(grid[x][y + 1])) {
+      get(size + grid[x][y + 1].size, 'E');
+    }
+    if (!up && x - 1 >= 0 && !same_component(grid[x - 1][y])) {
+      get(size + grid[x - 1][y].size, 'N');
+    }
+  }
+
+  bool same_component(const node& other) const
+  {
+    return component == other.component;
+  }
+
   void print() const
   {
     cerr << "(" << x << ", " << y << ") = " 
@@ -61,8 +92,8 @@ struct node
 
 int main()
 {
-  //freopen("castle.in", "r", stdin);
-  //freopen("castle.out", "w", stdout);
+  // freopen("castle.in", "r", stdin);
+  // freopen("castle.out", "w", stdout);
   int m, n;
   cin >> m >> n;
   vector<vector<node>> grid(n, vector<node>(m));
@@ -87,14 +118,32 @@ int main()
       }
     }
   }
-  int x = -1, y = -1;
-  int merge_size = numeric_limits<int>::min();
-  char wall_direction = '-';
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
-      
+      grid[i][j].merge_rooms(grid);
+    }
+  }
+  int x = -1;
+  int y = -1;
+  int merge_size = numeric_limits<int>::min();
+  char direction = 'A';
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      if (grid[i][j].size_after_merge == merge_size && grid[i][j].direction > direction) {
+        direction = grid[i][j].direction;
+        x = i + 1;
+        y = j + 1;
+      }
+      if (grid[i][j].size_after_merge > merge_size) {
+        merge_size = grid[i][j].size_after_merge;
+        direction = grid[i][j].direction;
+        x = i + 1;
+        y = j + 1;
+      }
     }
   }
   cout << result << '\n';
   cout << max_size << '\n';
+  cout << merge_size << '\n';
+  cout << x << ' ' << y << ' ' << direction << endl;
 }
