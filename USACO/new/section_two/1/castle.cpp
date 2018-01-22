@@ -25,10 +25,10 @@ struct node
   bool visited;
   int size;
   int component;
-  int size_after_merge;
-  char direction;
 
-  node(): visited(false) { }
+  node(): visited(false)
+  {
+  }
 
   node(int _x, int _y, int n):
     up((n & 2) == 0),
@@ -36,11 +36,9 @@ struct node
     left((n & 1) == 0),
     right((n & 4) == 0),
     x(_x), y(_y),
-    visited(false),
-    size_after_merge(numeric_limits<int>::min()),
-    direction('A')
-    {
-    }
+    visited(false)
+  {
+  }
 
   vector<node*> dfs(vector<vector<node>>& grid)
   {
@@ -55,31 +53,14 @@ struct node
     return cur;
   }
 
-  void merge_rooms(const vector<vector<node>>& grid)
-  {
-    auto get = [this](const int s, const char d) {
-      if (s >= size_after_merge) {
-        size_after_merge = s;
-        direction = d;
-      }
-    };
-    if (!left && y - 1 >= 0 && !same_component(grid[x][y - 1])) {
-      get(size + grid[x][y - 1].size, 'W');
-    }
-    if (!down && x + 1 < SIZE(grid) && !same_component(grid[x + 1][y])) {
-      get(size + grid[x + 1][y].size, 'S');
-    }
-    if (!right && y + 1 < SIZE(grid[x]) && !same_component(grid[x][y + 1])) {
-      get(size + grid[x][y + 1].size, 'E');
-    }
-    if (!up && x - 1 >= 0 && !same_component(grid[x - 1][y])) {
-      get(size + grid[x - 1][y].size, 'N');
-    }
-  }
-
-  bool same_component(const node& other) const
+  bool connected_to(const node& other) const
   {
     return component == other.component;
+  }
+
+  int merge_size(const node& other) const
+  {
+    return size + other.size;
   }
 
   void print() const
@@ -87,6 +68,25 @@ struct node
     cerr << "(" << x << ", " << y << ") = " 
       << "(up = " << up << ", down = " << down 
       << ", left = " << left << ", right = " << right << ")\n";
+  }
+};
+
+struct room_data
+{
+  int x, y;
+  int merge_size;
+  char removed_wall_direction;
+
+  room_data():
+    x(-1), y(-1),
+    merge_size(numeric_limits<int>::min()),
+    removed_wall_direction('A')
+  {
+  }
+
+  room_data(int _x, int _y, int size, char direction):
+    x(_x),  y(_y), merge_size(size), removed_wall_direction(direction)
+  {
   }
 };
 
@@ -102,7 +102,7 @@ int main()
       grid[i][j] = node(i, j, next<int>());
     }
   }
-  int result = 0;
+  int rooms_count = 0;
   int max_size = numeric_limits<int>::min();
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
@@ -111,39 +111,33 @@ int main()
         vector<node*> component = room.dfs(grid);
         for (node* cn : component) {
           cn->size = SIZE(component);
-          cn->component = result;
+          cn->component = rooms_count;
         }
         max_size = max(max_size, SIZE(component));
-        result++;
+        rooms_count++;
       }
     }
   }
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < m; j++) {
-      grid[i][j].merge_rooms(grid);
-    }
-  }
-  int x = -1;
-  int y = -1;
-  int merge_size = numeric_limits<int>::min();
-  char direction = 'A';
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < m; j++) {
-      if (grid[i][j].size_after_merge == merge_size && grid[i][j].direction > direction) {
-        direction = grid[i][j].direction;
-        x = i + 1;
-        y = j + 1;
+  room_data room;
+  for (int j = m - 1; j >= 0; j--) {
+    for (int i = 0; i < n; i++) {
+      const node& cur_node = grid[i][j];
+      if (j - 1 >= 0 && !cur_node.connected_to(grid[i][j - 1])) {
+        int value = cur_node.merge_size(grid[i][j - 1]);
+        if (value >= room.merge_size) {
+          room = room_data(i + 1, j, value, 'E');
+        }
       }
-      if (grid[i][j].size_after_merge > merge_size) {
-        merge_size = grid[i][j].size_after_merge;
-        direction = grid[i][j].direction;
-        x = i + 1;
-        y = j + 1;
+      if (i + 1 < n && !cur_node.connected_to(grid[i + 1][j])) {
+        int value = cur_node.merge_size(grid[i + 1][j]);
+        if (value >= room.merge_size) {
+          room = room_data(i + 1, j + 1, value, 'N');
+        }
       }
     }
   }
-  cout << result << '\n';
+  cout << rooms_count << '\n';
   cout << max_size << '\n';
-  cout << merge_size << '\n';
-  cout << x << ' ' << y << ' ' << direction << endl;
+  cout << room.merge_size << '\n';
+  cout << room.x << ' ' << room.y << ' ' << room.removed_wall_direction << endl;
 }
