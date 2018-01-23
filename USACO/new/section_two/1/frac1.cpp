@@ -67,7 +67,7 @@ int main()
     set<fraction> result;
     for (int d = 1; d <= m; d++) {
         for (int n = 0; n <= d; n++) {
-            result.insert(move(fraction(n, d)));
+            result.insert(fraction(n, d));
         }
     }
     for (auto&& f : result) cout << f << '\n';
